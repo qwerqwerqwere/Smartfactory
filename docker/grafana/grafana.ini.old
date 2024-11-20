@@ -1,0 +1,14 @@
+[smtp]
+enabled = true
+host = smtp.gmail.com:587
+user = oyh1202@gmail.com
+password = ncnpvkuabvzbrnyx
+from_address = oyh1202@gmail.com
+from_name = Grafana Alerts
+skip_verify = true
+
+[unified_alerting]
+enabled = true
+
+#[preferences]
+#home_dashboard_path = /d/ee36zsps9a800e/testdash?from=now-6h&to=now&timezone=browser

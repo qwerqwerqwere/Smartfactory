@@ -1,0 +1,2 @@
+alerting_rules:
+  - path: /etc/grafana/provisioning/alerting/alert-rule.json

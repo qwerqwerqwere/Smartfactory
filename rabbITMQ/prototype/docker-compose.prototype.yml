@@ -1,0 +1,99 @@
+version: "3"
+
+services: 
+    rabbitmq:
+        image: rabbitmq:3.8-management
+        container_name: rabbitmq
+        hostname: "rabbITMQ-machine"
+        #environment:
+        #    - RABBITMQ_NODENAME=rabbITMQ-Stack1
+        env_file: prototype.env
+        networks:
+            - "iotstack"
+        ports: 
+            - "5672:5672" # AMQP Port
+            - "15672:15672" # Management UI HTT
+            - "1883:1883"
+        volumes: 
+            - ./rabbitmq/plugins/enabled_plugins:/etc/rabbitmq/enabled_plugins
+            - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+            - rabbitmq_data:/var/lib/rabbitmq
+
+        restart: always
+        
+    influxdb:
+        image: influxdb:2.0.4
+        container_name: influxdb
+        env_file: prototype.env
+        #environment:
+        #    - DOCKER_INFLUXDB_INIT_MODE=setup
+        #    - DOCKER_INFLUXDB_INIT_USERNAME=admin
+        #    - DOCKER_INFLUXDB_INIT_PASSWORD=rabbITMQ_Prototype_Stack
+        #    - DOCKER_INFLUXDB_INIT_ORG=IoT-Yoda
+        #    - DOCKER_INFLUXDB_INIT_BUCKET=rabbitBucket
+        #    - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=verysecretivetoken
+        networks: 
+            - "iotstack"
+        ports:
+            - "8086:8086"
+        volumes: 
+            - influxdb_data:/root/.influxdbv2
+
+        restart: always
+    
+    telegraf:
+        image: telegraf:1.18
+        container_name: telegraf
+        env_file: prototype.env
+#        restart: on-failure # required till user credentials created
+        links: 
+            - influxdb
+            - rabbitmq
+        depends_on: 
+            # do not start before RabbitMQ, InfluxDB
+            - rabbitmq
+            - influxdb
+        #environment:
+        #    - TELEGRAF_AMQP_BROKER_USERNAME=telegraf
+        #    - TELEGRAF_AMQP_BROKER_PASSWORD=rabbITMQ_Prototype_Stack      
+        networks: 
+            - "iotstack"
+        volumes: 
+            - ./telegraf/telegraf.toml:/etc/telegraf/telegraf.conf:ro
+
+        restart: always
+
+
+    grafana:
+       image: grafana/grafana:latest
+ #       ports:
+ #         - "3000:3000"
+ #       links:
+ #         - influxdb
+ #       volumes:
+ #         - grafana:/var/lib/grafana
+ #       restart: always
+       container_name: grafana
+       restart: always
+       depends_on:
+         - influxdb
+       environment:
+         - GF_SECURITY_ADMIN_USER=admin
+         - GF_SECURITY_ADMIN_PASSWORD=admin
+       links:
+         - influxdb
+       ports:
+         - '3000:3000'  # Expose Grafana on port 3000
+       volumes:
+         - grafana_data:/var/lib/grafana  # Mount the Grafana data directory
+       networks:
+         - "iotstack" 
+
+volumes: 
+    rabbitmq_data:
+    influxdb_data:
+    grafana_data:
+
+networks:
+    iotstack:
+        external: true

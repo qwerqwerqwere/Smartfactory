@@ -1,0 +1,18 @@
+{
+  "apiVersion": 1,
+  "contactPoints": [
+    {
+      "name": "sysalerting01",
+      "receivers": [
+        {
+          "uid": "mainsysuid",
+          "type": "email",
+          "settings": {
+            "addresses": "oyh1202@gmail.com; hyunwoo50@cbnu.ac.kr",
+            "singleEmail": true
+          }
+        }
+      ]
+    }
+  ]
+}

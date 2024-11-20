@@ -1,0 +1,251 @@
+{
+    "apiVersion": 1,
+    "groups": [
+        {
+            "orgId": 1,
+            "name": "Sensor_Alerting",
+            "folder": "Sensor_Alerting_01",
+            "interval": "30s",
+            "rules": [
+                {
+                    "uid": "fe46w0i44g1kwd",
+                    "title": "Sensor_Alerting",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": {
+                                "from": 600,
+                                "to": 0
+                            },
+                            "datasourceUid": "de43g0c0xdfcwc",
+                            "model": {
+                                "datasource": {
+                                    "type": "influxdb",
+                                    "uid": "de43g0c0xdfcwc"
+                                },
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "query": "from(bucket: \"mybucket\")\r\n  |> range(start: -1h)  // 최근 1시간 데이터\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mybucket\")  // 측정 데이터 필터링\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\" or r[\"_field\"] == \"humidity\")  // 필드 선택\r\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)  // 1분 평균값 계산\r\n  |> map(fn: (r) => ({\r\n      r with\r\n      is_exceeding: if r[\"_field\"] == \"temperature\" and r._value > 390 then true\r\n                    else if r[\"_field\"] == \"humidity\" and r._value > 290 then true\r\n                    else false\r\n    }))  // 초과 여부를 필드로 추가\r\n  |> filter(fn: (r) => r.is_exceeding)  // 초과된 데이터만 필터링\r\n  |> yield(name: \"alerts\")\r\n",
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "B",
+                            "relativeTimeRange": {
+                                "from": 0,
+                                "to": 0
+                            },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [],
+                                            "type": "gt"
+                                        },
+                                        "operator": {
+                                            "type": "and"
+                                        },
+                                        "query": {
+                                            "params": [
+                                                "B"
+                                            ]
+                                        },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "reducer": "last",
+                                "refId": "B",
+                                "type": "reduce"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "relativeTimeRange": {
+                                "from": 0,
+                                "to": 0
+                            },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [
+                                                0
+                                            ],
+                                            "type": "gt"
+                                        },
+                                        "operator": {
+                                            "type": "and"
+                                        },
+                                        "query": {
+                                            "params": [
+                                                "C"
+                                            ]
+                                        },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "B",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "1m",
+                    "isPaused": false,
+                    "notification_settings": {
+                        "receiver": "grafana-default-email"
+                    }
+                }
+            ]
+        },
+        {
+            "orgId": 1,
+            "name": "Cpu_Alerting",
+            "folder": "System_Alert",
+            "interval": "30s",
+            "rules": [
+                {
+                    "uid": "ae46v7jvi4xdsf",
+                    "title": "Cpu_Alert",
+                    "condition": "C",
+                    "data": [
+                        {
+                            "refId": "A",
+                            "relativeTimeRange": {
+                                "from": 600,
+                                "to": 0
+                            },
+                            "datasourceUid": "ae43g7hhwledcc",
+                            "model": {
+                                "datasource": {
+                                    "type": "influxdb",
+                                    "uid": "ae43g7hhwledcc"
+                                },
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "query": "from(bucket: \"system_metrics\")\r\n  |> range(start: -1m)\r\n  |> filter(fn: (r) => r._measurement == \"cpu\" and r._field == \"usage_user\")\r\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\r\n  |> yield(name: \"cpu_usage\")\r\n",
+                                "refId": "A"
+                            }
+                        },
+                        {
+                            "refId": "B",
+                            "relativeTimeRange": {
+                                "from": 0,
+                                "to": 0
+                            },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [],
+                                            "type": "gt"
+                                        },
+                                        "operator": {
+                                            "type": "and"
+                                        },
+                                        "query": {
+                                            "params": [
+                                                "B"
+                                            ]
+                                        },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "A",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "reducer": "last",
+                                "refId": "B",
+                                "type": "reduce"
+                            }
+                        },
+                        {
+                            "refId": "C",
+                            "relativeTimeRange": {
+                                "from": 0,
+                                "to": 0
+                            },
+                            "datasourceUid": "__expr__",
+                            "model": {
+                                "conditions": [
+                                    {
+                                        "evaluator": {
+                                            "params": [
+                                                80
+                                            ],
+                                            "type": "gt"
+                                        },
+                                        "operator": {
+                                            "type": "and"
+                                        },
+                                        "query": {
+                                            "params": [
+                                                "C"
+                                            ]
+                                        },
+                                        "reducer": {
+                                            "params": [],
+                                            "type": "last"
+                                        },
+                                        "type": "query"
+                                    }
+                                ],
+                                "datasource": {
+                                    "type": "__expr__",
+                                    "uid": "__expr__"
+                                },
+                                "expression": "B",
+                                "intervalMs": 1000,
+                                "maxDataPoints": 43200,
+                                "refId": "C",
+                                "type": "threshold"
+                            }
+                        }
+                    ],
+                    "noDataState": "NoData",
+                    "execErrState": "Error",
+                    "for": "1m",
+                    "isPaused": false,
+                    "notification_settings": {
+                        "receiver": "System_Alerting"
+                    }
+                }
+            ]
+        }
+    ]
+}

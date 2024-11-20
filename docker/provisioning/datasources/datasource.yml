@@ -1,0 +1,57 @@
+apiVersion: 1
+
+datasources:
+  - name: influxdb_Sensor
+    uid: influxdb_Sensor_uid
+    type: influxdb
+    access: proxy
+    url: http://121.189.56.245:8086
+    basicAuth: true
+    basicAuthUser: admin
+    secureJsonData:
+      basicAuthPassword: bigdatalab!234
+      token: Cj3BI-zELUdOXUNqsEL_4BS7S1YQfivmbmJRx2fNpOwSFEwI6DZYZ3yU3rMxGp39y1wa-F0kMWmyDtAPDd9i6g==
+    jsonData:
+      organization: bigdatalabs
+      defaultBucket: mybucket
+      maxSeries: 1000
+      minTimeInterval: 10s
+      httpMode: POST
+      version: Flux
+
+  - name: influxdb_system_metrics
+    uid: influxdb_system_metrics_uid
+    type: influxdb
+    access: proxy
+    url: http://121.189.56.245:8086
+    basicAuth: true
+    basicAuthUser: admin
+    secureJsonData:
+      basicAuthPassword: bigdatalab!234
+      token: Cj3BI-zELUdOXUNqsEL_4BS7S1YQfivmbmJRx2fNpOwSFEwI6DZYZ3yU3rMxGp39y1wa-F0kMWmyDtAPDd9i6g==
+    jsonData:
+      organization: bigdatalabs
+      defaultBucket: system_metrics
+      maxSeries: 1000
+      minTimeInterval: 10s
+      httpMode: POST
+      version: Flux
+
+  - name: MariaDB
+    uid: MariaDB_uid
+    type: mysql
+    access: proxy
+    url: mysql://121.189.56.245:3306
+    database: appwrite
+    user: user
+    secureJsonData:
+      password: password
+    jsonData:
+      tlsAuth: false
+      tlsAuthWithCACert: false
+      tlsSkipVerify: false
+      timeInterval: 1m
+      connectionMaxOpen: 100
+      connectionMaxIdle: 100
+      connectionMaxLifetime: 14400
+      timezone: Asia/Seoul

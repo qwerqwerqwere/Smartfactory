@@ -1,0 +1,26 @@
+apiVersion: 1
+groups:
+  - name: Simple_Alerts
+    folder: Basic_Alerts
+    interval: 1m
+    rules:
+      - uid: "mainsysuid"
+        alert: Simple_CPU_Alert
+        title: "Simple CPU Alert"
+        condition: A
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          description: "Trigger when CPU usage is over 80%."
+        notification_settings:
+          receiver: "sysalerting01"
+        data:
+          - refId: A
+            datasourceUid: influxdb_system_metrics_uid
+            query: |
+              from(bucket: "system_metrics")
+                |> range(start: -5m)
+                |> filter(fn: (r) => r["_measurement"] == "cpu" and r["_field"] == "usage_user")
+                |> aggregateWindow(every: 1m, fn: mean)
+                |> filter(fn: (r) => r._value > 80)

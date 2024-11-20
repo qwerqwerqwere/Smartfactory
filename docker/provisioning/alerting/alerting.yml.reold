@@ -1,0 +1,111 @@
+apiVersion: 1
+
+groups:
+  - name: Sensor_Alerting
+    folder: Sensor_Alerts
+    interval: 30s
+    rules:
+      - alert: Sensor_Alerting
+        title: "Sensor Alert"
+        uid: fe46w0i44g1kwd
+        condition: C
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          description: "Alert triggered for sensor data (temperature/humidity)."
+        notification_settings:
+          receiver: grafana-default-email
+        data:
+          - refId: A
+            datasource: influxdb
+            datasourceUid: influxdb_Sensor_uid
+            query: |
+              from(bucket: "mybucket")
+                |> range(start: -1h)
+                |> filter(fn: (r) => r["_measurement"] == "mybucket")
+                |> filter(fn: (r) => r["_field"] == "temperature" or r["_field"] == "humidity")
+                |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+                |> map(fn: (r) => ({
+                    r with
+                    is_exceeding: if r["_field"] == "temperature" and r._value > 390 then true
+                                  else if r["_field"] == "humidity" and r._value > 290 then true
+                                  else false
+                  }))
+                |> filter(fn: (r) => r.is_exceeding)
+                |> yield(name: "alerts")
+          - refId: B
+            datasource: expr
+            expression: A
+            conditions:
+              - evaluator:
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params: ["B"]
+                reducer:
+                  type: last
+          - refId: C
+            datasource: expr
+            expression: B
+            conditions:
+              - evaluator:
+                  params: [0]
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params: ["C"]
+                reducer:
+                  type: last
+  - name: Cpu_Alerting
+    folder: System_Alerts
+    interval: 30s
+    rules:
+      - alert: Cpu_Alert
+        title: "CPU Usage Alert"
+        uid: ae46v7jvi4xdsf
+        condition: C
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          description: "CPU usage exceeds 80%."
+        notification_settings:
+          receiver: System_Alerting
+        data:
+          - refId: A
+            datasource: influxdb
+            datasourceUid: influxdb_system_metrics_uid
+            query: |
+              from(bucket: "system_metrics")
+                |> range(start: -1m)
+                |> filter(fn: (r) => r["_measurement"] == "cpu" and r["_field"] == "usage_user")
+                |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+                |> yield(name: "cpu_usage")
+          - refId: B
+            datasource: expr
+            expression: A
+            conditions:
+              - evaluator:
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params: ["B"]
+                reducer:
+                  type: last
+          - refId: C
+            datasource: expr
+            expression: B
+            conditions:
+              - evaluator:
+                  params: [80]
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params: ["C"]
+                reducer:
+                  type: last
