@@ -1,8 +1,18 @@
-CREATE DATABASE IF NOT EXISTS `appwrite` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+CREATE DATABASE IF NOT EXISTS 'appwrite' /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
-USE `appwrite`;
+USE 'appwrite';
 
-CREATE TABLE IF NOT EXISTS `template.abuse.abuse` (
+CREATE TABLE IF NOT EXISTS 'sensor_reading' (
+  'id' int(11) NOT NULL AUTO_INCREMENT,
+  'sensor_id' varchar(255) NOT NULL,
+  'temperature' float NOT NULL,
+  'humidity' float DEFAULT NULL,
+  'input_time' datetime DEFAULT current_timestamp(),
+  PRIMARY KEY ('id')
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+/*CREATE TABLE IF NOT EXISTS `template.abuse.abuse` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `_key` varchar(255) NOT NULL,
   `_time` int(11) NOT NULL,
@@ -87,4 +97,4 @@ CREATE TABLE IF NOT EXISTS `app_console.database.properties` LIKE `template.data
 CREATE TABLE IF NOT EXISTS `app_console.database.relationships` LIKE `template.database.relationships`;
 CREATE TABLE IF NOT EXISTS `app_console.database.unique` LIKE `template.database.unique`;
 CREATE TABLE IF NOT EXISTS `app_console.audit.audit` LIKE `template.audit.audit`;
-CREATE TABLE IF NOT EXISTS `app_console.abuse.abuse` LIKE `template.abuse.abuse`;
+CREATE TABLE IF NOT EXISTS `app_console.abuse.abuse` LIKE `template.abuse.abuse`;*/

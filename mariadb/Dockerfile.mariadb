@@ -1,0 +1,13 @@
+FROM mariadb:11.4
+
+LABEL maintainer="team@appwrite.io"
+
+RUN apt-get update && apt-get install -y mailutils ssmtp
+
+# Add appwrite schema and tables
+ADD ./all.sql /docker-entrypoint-initdb.d/all.sql
+
+RUN chown -R mysql:mysql /docker-entrypoint-initdb.d/
+
+# MariaDB 서버 실행 명령 (docker-compose.yml에서 override 가능)
+CMD ["mariadbd"]

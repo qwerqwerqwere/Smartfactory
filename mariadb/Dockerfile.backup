@@ -1,0 +1,21 @@
+FROM mariadb:11.4
+
+LABEL maintainer="team@appwrite.io"
+
+# Cron 설치
+RUN apt-get update && apt-get install -y cron mariadb-client sshpass mailutils ssmtp
+
+# 백업 스크립트 복사
+COPY scripts/backup.sh /usr/local/bin/mariadb_backup.sh
+
+# Cronjob 설정
+RUN echo "0 0 * * * /usr/local/bin/mariadb_backup.sh >> /var/log/mariadb_backup.log 2>&1" > /etc/cron.d/mariadb_backup
+
+# 권한 설정
+RUN chmod +x /usr/local/bin/mariadb_backup.sh && chmod 0644 /etc/cron.d/mariadb_backup
+
+# Cronjob 등록
+RUN crontab /etc/cron.d/mariadb_backup
+
+# Cron 실행
+CMD ["cron", "-f"]

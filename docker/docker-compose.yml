@@ -8,7 +8,8 @@ services:
       - "8086:8086"
     env_file: ./credentials.env
     volumes:
-      - influxdb_data:/var/lib/influxdb2
+      - /data/mariadb_db-mariadb/_data/influxdb:/var/lib/influxdb2
+#      - influxdb_data:/var/lib/influxdb2
       - ./create-buckets.sh/create-bucket.sh:/docker-entrypoint-initdb.d/create-buckets.sh  # 스크립트 추가
     networks:
       - monitoring
